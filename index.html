@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pulse — AI Skills & Power Prompts</title>
+<style>
+:root{
+  --bg:#faf9f5;--surface:#fff;--surface2:#f1efe8;--text:#1f1e1b;--muted:#6b685f;--border:#e3e0d5;
+  --accent:#c96442;--accent-soft:#f6e3da;--claude:#c96442;--openai:#2e8b57;--gemini:#2f6fed;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1a1917;--surface:#242320;--surface2:#2d2b27;--text:#f0eee6;--muted:#a09c90;--border:#3a3833;
+    --accent:#e08463;--accent-soft:#3b2a22;--claude:#e08463;--openai:#5cc48a;--gemini:#6b9bff;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1a1917;--surface:#242320;--surface2:#2d2b27;--text:#f0eee6;--muted:#a09c90;--border:#3a3833;
+  --accent:#e08463;--accent-soft:#3b2a22;--claude:#e08463;--openai:#5cc48a;--gemini:#6b9bff;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+.wrap{max-width:1060px;margin:0 auto;padding:0 18px 70px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 8px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:21px;letter-spacing:-.03em;display:flex;align-items:center;gap:9px;cursor:pointer;border:0;background:none;color:var(--text);padding:0}
+.logo i{width:24px;height:24px;border-radius:50%;background:conic-gradient(var(--claude),var(--openai),var(--gemini),var(--claude));display:inline-block}
+.right{display:flex;gap:8px;align-items:center}
+.net{font-size:12px;color:var(--muted);border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 11px;display:flex;align-items:center;gap:6px}
+.net b{width:8px;height:8px;border-radius:50%;background:var(--openai);display:inline-block}
+.net.off b{background:#d9a21b}
+.theme{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:999px;padding:7px 13px;cursor:pointer;font-size:13px}
+.nav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px;overflow-x:auto;scrollbar-width:none;margin:6px 0 0}
+.nav::-webkit-scrollbar{display:none}
+.nav button{border:0;background:transparent;color:var(--muted);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.nav button[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hero{padding:26px 0 8px}
+.hero h1{font-size:clamp(27px,5vw,42px);line-height:1.12;margin:0 0 10px;letter-spacing:-.03em}
+.hero p{color:var(--muted);margin:0 0 16px;max-width:660px;font-size:16.5px}
+.search{display:flex;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px 5px 5px 14px;align-items:center}
+.search:focus-within{border-color:var(--accent)}
+.search input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:16px;padding:10px 0;min-width:0}
+.search button{border:0;background:var(--surface2);color:var(--muted);border-radius:10px;padding:8px 12px;cursor:pointer;font-size:13px}
+.chips,.subtabs{display:flex;gap:8px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar,.subtabs::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:7px}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.chip[data-p="claude"] .dot{background:var(--claude)}.chip[data-p="openai"] .dot{background:var(--openai)}.chip[data-p="gemini"] .dot{background:var(--gemini)}
+.chip[aria-pressed="true"]{border-color:var(--text);box-shadow:inset 0 0 0 1px var(--text)}
+.sub{white-space:nowrap;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);padding:9px 4px;margin-right:16px;font-size:14.5px;font-weight:600;cursor:pointer}
+.sub[aria-pressed="true"]{color:var(--text);border-bottom-color:var(--accent)}
+.sub span{opacity:.6;font-weight:500;margin-left:5px;font-size:12px}
+.subtabs{border-bottom:1px solid var(--border);padding-top:6px;gap:0}
+.subhelp{color:var(--muted);font-size:14.5px;margin:12px 0 0;max-width:700px}
+.meta{color:var(--muted);font-size:13px;margin:14px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.card:hover{border-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.badges{display:flex;gap:5px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;background:var(--surface2);color:var(--muted)}
+.badge.claude{background:color-mix(in srgb,var(--claude) 16%,transparent);color:var(--claude)}
+.badge.openai{background:color-mix(in srgb,var(--openai) 16%,transparent);color:var(--openai)}
+.badge.gemini{background:color-mix(in srgb,var(--gemini) 16%,transparent);color:var(--gemini)}
+.badge.lvl{background:var(--accent-soft);color:var(--accent)}
+.card h3{margin:2px 0 0;font-size:16.5px;line-height:1.3;word-break:break-word}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.card .why{color:var(--text)}
+.stat{font-size:13px;font-weight:600}
+.lab{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:2px}
+.cmd{display:flex;gap:6px;align-items:flex-start;background:var(--surface2);border-radius:8px;padding:7px 7px 7px 10px}
+.cmd code,.cmd pre{margin:0;font:12.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;flex:1;min-width:0}
+.cmd code{overflow-x:auto;white-space:nowrap;scrollbar-width:none;padding-top:2px}
+.cmd pre{white-space:pre-wrap;word-break:break-word}
+.copy{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer;flex:none}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags em{font-style:normal;font-size:11.5px;background:var(--surface2);color:var(--muted);padding:2px 8px;border-radius:6px}
+.card a.go{color:var(--accent);font-size:13.5px;text-decoration:none;font-weight:700}
+.card a.go:hover{text-decoration:underline}
+mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 2px}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:44px 10px;border:1px dashed var(--border);border-radius:14px}
+h2.sec{font-size:19px;margin:30px 0 4px}
+.note{background:var(--accent-soft);color:var(--text);border-radius:12px;padding:12px 14px;font-size:14px;margin:16px 0 0}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:6px}
+.big button{text-align:left;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:14px;padding:16px;cursor:pointer;font:inherit}
+.big button:hover{border-color:var(--accent)}
+.big strong{display:block;font-size:16px;margin-bottom:3px}
+.big span{color:var(--muted);font-size:14px}
+.big em{font-style:normal;font-size:22px;display:block;margin-bottom:6px}
+.faq{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px 16px;margin-top:12px}
+.faq details{padding:12px 0;border-bottom:1px solid var(--border)}
+.faq details:last-child{border-bottom:0}
+.faq summary{font-weight:700;cursor:pointer}
+.faq p{color:var(--muted);margin:8px 0 0;font-size:14.5px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}
+@media(max-width:760px){.form{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel label{font-size:13px;font-weight:700;display:flex;flex-direction:column;gap:5px}
+.panel label small{font-weight:400;color:var(--muted)}
+.panel input[type=text],.panel textarea,.panel select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px 10px;font:inherit;font-size:14.5px}
+.panel textarea{min-height:72px;resize:vertical}
+.panel .chk{flex-direction:row;align-items:center;gap:8px;font-weight:500;font-size:14px}
+.out{white-space:pre-wrap;word-break:break-word;background:var(--surface2);border-radius:10px;padding:12px;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;min-height:160px;margin:0}
+.btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:14px}
+[hidden]{display:none!important}
+footer .fine{margin-top:4px;font-size:12px;opacity:.85}
+footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:40px;border-top:1px solid var(--border);padding-top:14px}
+
+:root{--hairline-plate:#faf9f5;--hairline-hi:var(--accent);--hairline-edge:#b3ad9d;--hairline-mid:#d0cabb;--hairline-lo:#e4e0d3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--hairline-plate:#1a1917;--hairline-edge:#7b7568;--hairline-mid:#4b4841;--hairline-lo:#35332e}}
+:root[data-theme="dark"]{--hairline-plate:#1a1917;--hairline-edge:#7b7568;--hairline-mid:#4b4841;--hairline-lo:#35332e}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,300px);gap:24px;align-items:center}
+.hero.start{grid-template-columns:minmax(0,1fr) minmax(220px,420px)}
+.figslot{min-width:0}
+.figure{pointer-events:none;width:100%}
+@media(max-width:720px){.hero,.hero.start{grid-template-columns:1fr}.figslot{max-width:260px;margin:0 auto}}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--claude),var(--openai) 55%,var(--gemini));-webkit-background-clip:text;background-clip:text;color:transparent}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(600px 300px at 85% -5%,color-mix(in srgb,var(--accent) 14%,transparent),transparent),radial-gradient(500px 300px at -5% 30%,color-mix(in srgb,var(--gemini) 9%,transparent),transparent)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card,.big button{animation:rise .45s both;animation-delay:calc(var(--i,0)*40ms)}
+.card{transition:transform .18s,border-color .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px -14px color-mix(in srgb,var(--accent) 55%,transparent)}
+.big button{transition:transform .18s,border-color .18s}
+.big button:hover{transform:translateY(-3px)}
+@media (prefers-reduced-motion:reduce){.card,.big button{animation:none}.card:hover,.big button:hover{transform:none}}
+.ptabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}
+.ptab{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;font:inherit;display:flex;align-items:center;gap:10px}
+.ptab i{width:12px;height:12px;border-radius:50%;flex:none}
+.ptab b{display:block;font-size:15px}.ptab small{color:var(--muted);font-size:12.5px}
+.ptab[aria-pressed="true"]{border-color:var(--text);box-shadow:inset 0 0 0 1px var(--text)}
+.pcard .ic{width:40px;height:40px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:21px;flex:none}
+.pcard .top{display:flex;gap:12px;align-items:center}
+.pcard h3{margin:0}
+.pcard .ptxt{margin:0;font:12.5px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;word-break:break-word;flex:1;min-width:0;color:var(--text)}
+.ph{background:var(--accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:600}
+.badge.pop{background:var(--accent);color:#fff}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+@media(max-width:420px){.pgrid{grid-template-columns:1fr}}
+.big em svg{width:28px;height:28px;fill:none;stroke:var(--accent);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
+.step{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 -6px}
+body{min-height:100vh;display:flex;flex-direction:column}
+.wrap{width:100%;flex:1;display:flex;flex-direction:column;padding-bottom:28px}
+.wrap>section{margin-bottom:44px}
+footer{margin-top:auto;text-align:center;border-top:1px solid var(--border);padding:22px 8px 6px;color:var(--muted)}
+footer p{margin:0}
+footer .copy1{font-size:14px;color:var(--text)}
+footer .copy2{font-size:13.5px;margin-top:3px}
+footer .fine{font-size:12px;max-width:640px;margin:10px auto 0;line-height:1.55;text-wrap:balance}
+.hero h1,.hero p{text-wrap:balance}
+html,body{overflow-x:hidden}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="logo" id="home" type="button" aria-label="Go to start page"><i></i>Pulse</button>
+    <div class="right">
+      <span class="net" id="net" role="status"><b></b><span id="nettxt">Works offline</span></span>
+      <button class="theme" id="theme" type="button">Theme</button>
+    </div>
+  </header>
+  <nav class="nav" id="nav" aria-label="Sections"></nav>
+
+  <!-- START -->
+  <section id="v-start">
+    <div class="hero start">
+      <div class="herotext">
+        <h1>Make your AI work <em>better</em> for you.</h1>
+        <p>Pick what you need, choose your AI, copy, and get to work. Ready for Claude, ChatGPT and Gemini. No sign-up.</p>
+      </div>
+      <div class="figslot"></div>
+    </div>
+    <h2 class="sec">Choose a category</h2>
+    <div class="big" id="goals"></div>
+
+      </section>
+
+  <!-- SKILLS & MODS -->
+  <section id="v-skills" hidden>
+    <div class="hero"><div class="herotext">
+      <h1>Skills &amp; add-ons</h1>
+      <p>Add-ons that teach your AI new abilities: make slides, read PDFs, browse websites, follow good engineering habits.</p>
+      <div class="search"><input id="qs" type="search" placeholder="Search… (try: pdf, slides, browser, excel)" autocomplete="off" aria-label="Search skills and mods"><button type="button" data-clear="qs">Clear</button></div>
+    </div><div class="figslot"></div></div>
+    <div class="step">Choose your AI</div><div class="chips" id="ps"></div>
+    <div class="subtabs" id="st"></div>
+    <p class="subhelp" id="sh"></p>
+    <div class="meta" id="cs"></div>
+    <div class="grid" id="ls"></div>
+    <div class="note">Tip: tap <strong>Copy</strong> on a card, then paste the line into your tool's chat or terminal. Star counts and details are from a snapshot (Oct 14, 2026) and may have changed.</div>
+  </section>
+
+  <!-- POWER PROMPTS -->
+  <section id="v-prompts" hidden>
+    <div class="hero"><div class="herotext">
+      <h1>Ready-made <em>prompts</em></h1>
+      <p>Ready-made prompts built for each chatbot. Pick your AI, tap Copy, swap the <span class="ph">[BRACKETS]</span> for your own details, and paste.</p>
+      <div class="search"><input id="qp" type="search" placeholder="Search prompts… (try: ultrathink, research, email, code)" autocomplete="off" aria-label="Search prompts"><button type="button" data-clear="qp">Clear</button></div>
+    </div><div class="figslot"></div></div>
+    <div class="step">Choose your AI</div><div class="ptabs" id="ptabs"></div>
+    <div class="meta" id="cp"></div>
+    <div class="grid pgrid" id="lp"></div>
+    <div class="note"><strong>Ultrathink</strong> is a Claude Code keyword that asks for the deepest thinking. In the Claude chat app, switch on <strong>Extended thinking</strong> instead. Prompts that mention a tool (Codex, Gemini CLI, subagents) are for that tool.</div>
+  </section>
+
+  <!-- COMMANDS -->
+  <section id="v-cmds" hidden>
+    <div class="hero"><div class="herotext">
+      <h1>Commands &amp; magic phrases</h1>
+      <p>Type <code>/</code> in tools like Claude Code, Codex or Gemini CLI to get shortcuts. Phrases below work in <em>any</em> AI chat, including ChatGPT.</p>
+      <div class="search"><input id="qc" type="search" placeholder="Search commands… (try: clear, memory, review)" autocomplete="off" aria-label="Search commands"><button type="button" data-clear="qc">Clear</button></div>
+    </div><div class="figslot"></div></div>
+    <div class="step">Choose your AI</div><div class="chips" id="pc"></div>
+    <div class="meta" id="cc"></div>
+    <div class="grid" id="lc"></div>
+    <div class="note">Commands change between versions. Type <code>/help</code> (or just <code>/</code>) inside the tool to see exactly what your version offers.</div>
+  </section>
+
+  <footer>
+    <p class="copy1">© 2026 <strong>SRIVELTECH</strong>. All rights reserved.</p>
+    <p class="copy2">Created by <strong>SRIVELTECH</strong></p>
+    <p class="fine">Claude, ChatGPT, OpenAI, Gemini and other names mentioned belong to their respective owners. Pulse by SRIVELTECH is independent and not affiliated with them. Links open external sites and need internet.</p>
+  </footer>
+</div>
+
+<script id="hl-kernel">
+/* hairline kernel sha256:3a19aa2640ba8c6c306184d05fddfbd4f3323a6ebd9217dd3cbb38e9db74991c */
+/*
+ * HL: everything a figure may call. Read this index; the code under it is the
+ * package's src/core, unchanged, and a figure should not need to read it.
+ *
+ * Every figure is drawn in a 400 × 320 viewBox. World space is x/y on the
+ * ground and z up. Plates are filled with the ground colour and painted back
+ * to front, so a nearer one covers a farther one: append in that order. At
+ * the default camera, Cam(45, 0.5, S), +x runs down to the right and +y down
+ * to the left, so the corner with the largest x and y is nearest the viewer:
+ * append by ascending x + y, from the far corner (smallest x and y) to it.
+ *
+ * Camera
+ *   Cam(azDeg, k, S)                       a camera: azimuth in degrees, k = sin(elevation) (0.5 is the 2:1 view), S = scale
+ *   fit(C, points, cx, cy)                 centres the box of [x, y, z] points on (cx, cy); call it once, before proj
+ *                                          it only centres, it never scales: choose S by trying values, with the most extreme pose in points.
+ *                                          The six figures use S 1.42 to 2.12; the boxes they fit come out 230 to 310 wide and 180 to 245 tall
+ *   proj(C)                                returns P(x, y, z), which gives [sx, sy]
+ *   unproj(C, sx, sy, z)                   the world [x, y] under a screen point, on the plane at height z
+ *   facing(C)                              returns front(sample): whether a ring sample faces the camera
+ * Rounded solids
+ *   rrect(u0, v0, u1, v1, r, n)            a rounded rectangle, as a ring of samples {u, v, nu, nv}
+ *   circ(R, n)                             a circle, as a ring
+ *   rings(x0, y0, x1, y1, r, b)            [ring, inner]: a rounded footprint and its crease ring, inset by b
+ *                                          r, the corner radius, is cut to half the shorter side. b, the crease's inset in world units
+ *                                          (0.6 to 2.2 in the figures), must stay under half the shorter side or the crease turns inside out
+ *   prism(P, front, ring, inner, z0, z1)   {sil, crease}: a solid standing from z0 to z1, as two path strings
+ *   ringAt(P, ring, z)                     the ring's points, projected at height z
+ *   run(ring, keep)                        the one cyclic run of samples that pass keep
+ *   hull(points)                           the convex hull of screen points
+ *   extremes(P, ring)                      [left, right, nearest] samples: where dashed drops fall from
+ *   fillet(points, radii, n)               rounds every vertex of a closed polygon; returns the new points
+ *                                          radii is an array, one radius per vertex, each cut to half its shorter edge; a single number gives NaN.
+ *                                          n is the steps round each corner, default 4: each vertex becomes n + 1 points
+ *   ghost(P, front, ring, z0, depth)       a reflection's path {d, y0, y1}; reflect() draws it for you
+ * Paths and numbers
+ *   poly(points)                           a closed path string
+ *   open(points)                           an open polyline string
+ *   seg(a, b)                              one segment between two screen points [sx, sy], as its own subpath; project world points with P first
+ *   clamp(v, a, b)
+ *   lerp(a, b, t)
+ *   rad(deg)
+ *   r2(n)                                  two decimals
+ * The continuous clock: one spring per moving number
+ *   spring(x, opts)                        at rest on x; write .t to retarget; opts {k, c, m, eps}, default k 100, c 18, m 1
+ *   stepS(sp, dt)                          advances by dt seconds; returns whether it is still moving
+ * The discrete clock: a 700ms tween on (.32, .72, 0, 1)
+ *   tween(v, dur)                          at rest on v; dur defaults to 700 (ms)
+ *   tset(tw, to, now, delay)               retargets from where it is, after delay ms: the stagger
+ *                                          the same target again does nothing, so calling it on every pointer move is safe
+ *   tval(tw, now)                          its value at now
+ *   tdone(tw, now)                         whether it has landed
+ *   bezier(x1, y1, x2, y2)                 a CSS cubic-bezier, as a function of progress
+ *   EASE_LIFT                              the lift curve itself
+ *   reducedMotion()                        true when the reader asked for less motion; springs and tweens already land at once
+ *   setReducedMotion(on)                   the loop's business, not a figure's
+ * Drawing
+ *   mk(tag, attrs, parent)                 one svg element: the only way a figure makes a node
+ *   solid(parent)                          {g, sil, cr}: a group holding a silhouette path and a crease path
+ *   put(solid, paths)                      writes prism()'s {sil, crease} into solid()'s {sil, cr}: sil into sil, crease into cr
+ *   flatDot(parent, C, r, cls)             a dot lying on the ground plane; cls is "dot", "dot m" or "dot off"
+ *   place(el, point)                       moves a dot or a circle to [sx, sy]
+ *   reflect(svg, parent, P, front, ring, z0, depth)   a fading mirror under a solid
+ *   fade(svg, y0, y1, a0)                  a vertical fade, as a mask; returns the value for a mask attribute
+ * Life
+ *   register(stage, tick)                  joins the one frame loop; tick(dt in seconds, now in ms) returns true to ask for another frame; gives {wake, unregister}
+ *   pointer(stage, handlers)               {move(point), down(point), leave()}, points in viewBox units; returns its disposer
+ *   disposer()                             {add, on, dispose}: collects tear-down, so destroy is bag.dispose
+ * The bench's business, not a figure's
+ *   css(lightDark)
+ *   inject(root)
+ *   tour(stage, stops, onStop)             an unseen pointer that walks the stops, [x, y] in viewBox units or null to leave, and gives way to a real one; onStop(i) on each arrival; returns {stop}
+ *   LAP                                    the default stops: a diamond around the centre, then a leave
+ *
+ * Classes, on path, polygon, ellipse and line. They are the whole palette; a
+ * figure sets no colour, width or fill of its own.
+ *     (none)   filled with the ground colour, medium stroke
+ *     sil      the silhouette's stroke        hi    the bright stroke: the only highlight
+ *     lo       the dim stroke                 nf    no fill        fo   fill only, no stroke
+ *     dash     a dashed guide
+ *     dot      a bright dot                   dot m   a medium dot     dot off   a dim dot
+ */
+var HL = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // packages/hairline/src/core/kernel.ts
+  var kernel_exports = {};
+  __export(kernel_exports, {
+    Cam: () => Cam,
+    EASE_LIFT: () => EASE_LIFT,
+    LAP: () => LAP,
+    bezier: () => bezier,
+    circ: () => circ,
+    clamp: () => clamp,
+    css: () => css,
+    disposer: () => disposer,
+    extremes: () => extremes,
+    facing: () => facing,
+    fade: () => fade,
+    fillet: () => fillet,
+    fit: () => fit,
+    flatDot: () => flatDot,
+    ghost: () => ghost,
+    hull: () => hull,
+    inject: () => inject,
+    lerp: () => lerp,
+    mk: () => mk,
+    open: () => open,
+    place: () => place,
+    pointer: () => pointer,
+    poly: () => poly,
+    prism: () => prism,
+    proj: () => proj,
+    put: () => put,
+    r2: () => r2,
+    rad: () => rad,
+    reducedMotion: () => reducedMotion,
+    reflect: () => reflect,
+    register: () => register,
+    ringAt: () => ringAt,
+    rings: () => rings,
+    rrect: () => rrect,
+    run: () => run,
+    seg: () => seg,
+    setReducedMotion: () => setReducedMotion,
+    solid: () => solid,
+    spring: () => spring,
+    stepS: () => stepS,
+    tdone: () => tdone,
+    tour: () => tour,
+    tset: () => tset,
+    tval: () => tval,
+    tween: () => tween,
+    unproj: () => unproj
+  });
+
+  // packages/hairline/src/core/iso.ts
+  var clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  var lerp = (a, b, t) => a + (b - a) * t;
+  var rad = (d) => d * Math.PI / 180;
+  var r2 = (n) => Math.round(n * 100) / 100;
+  var poly = (pts) => "M" + pts.map((p) => r2(p[0]) + " " + r2(p[1])).join("L") + "Z";
+  var seg = (a, b) => `M${r2(a[0])} ${r2(a[1])}L${r2(b[0])} ${r2(b[1])}`;
+  var open = (pts) => pts.length < 2 ? "" : "M" + pts.map((p) => r2(p[0]) + " " + r2(p[1])).join("L");
+  var Cam = (azDeg, k, S) => ({ az: rad(azDeg), k, S, ox: 0, oy: 0 });
+  function proj(C) {
+    const c = Math.cos(C.az), s = Math.sin(C.az), zf = Math.sqrt(1 - C.k * C.k);
+    return (x, y, z) => {
+      const X = x * c - y * s, Y = x * s + y * c;
+      return [C.ox + C.S * X, C.oy + C.S * (Y * C.k - z * zf)];
+    };
+  }
+  function unproj(C, sx, sy, z) {
+    const c = Math.cos(C.az), s = Math.sin(C.az), zf = Math.sqrt(1 - C.k * C.k);
+    const X = (sx - C.ox) / C.S, Y = ((sy - C.oy) / C.S + z * zf) / C.k;
+    return [X * c + Y * s, -X * s + Y * c];
+  }
+  function fit(C, pts, cx, cy) {
+    C.ox = 0;
+    C.oy = 0;
+    const P = proj(C);
+    let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+    for (const p of pts) {
+      const q = P(p[0], p[1], p[2]);
+      a = Math.min(a, q[0]);
+      b = Math.max(b, q[0]);
+      c = Math.min(c, q[1]);
+      d = Math.max(d, q[1]);
+    }
+    C.ox = cx - (a + b) / 2;
+    C.oy = cy - (c + d) / 2;
+  }
+  function rrect(u0, v0, u1, v1, r, n = 4) {
+    r = Math.max(0, Math.min(r, (u1 - u0) / 2, (v1 - v0) / 2));
+    const out = [];
+    for (const [cu, cv, a0] of [[u1 - r, v1 - r, 0], [u0 + r, v1 - r, 90], [u0 + r, v0 + r, 180], [u1 - r, v0 + r, 270]])
+      for (let k = 0; k <= n; k++) {
+        const a = rad(a0 + 90 * k / n), ca = Math.cos(a), sa = Math.sin(a);
+        out.push({ u: cu + r * ca, v: cv + r * sa, nu: ca, nv: sa });
+      }
+    return out;
+  }
+  function circ(R, n = 96) {
+    const out = [];
+    for (let k = 0; k < n; k++) {
+      const a = k / n * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
+      out.push({ u: R * ca, v: R * sa, nu: ca, nv: sa });
+    }
+    return out;
+  }
+  function hull(input) {
+    const pts = input.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const x = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], up = [];
+    for (const p of pts) {
+      while (lo.length > 1 && x(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop();
+      lo.push(p);
+    }
+    for (let i = pts.length - 1; i >= 0; i--) {
+      const p = pts[i];
+      while (up.length > 1 && x(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop();
+      up.push(p);
+    }
+    lo.pop();
+    up.pop();
+    return lo.concat(up);
+  }
+  var ringAt = (P, ring, z) => ring.map((q) => P(q.u, q.v, z));
+  var facing = (C) => {
+    const s = Math.sin(C.az), c = Math.cos(C.az);
+    return (q) => q.nu * s + q.nv * c >= -1e-6;
+  };
+  function run(ring, keep) {
+    const n = ring.length;
+    let s = -1;
+    for (let i = 0; i < n; i++) if (keep(ring[i]) && !keep(ring[(i + n - 1) % n])) {
+      s = i;
+      break;
+    }
+    if (s < 0) return keep(ring[0]) ? ring.slice() : [];
+    const out = [];
+    for (let k = 0; k < n && keep(ring[(s + k) % n]); k++) out.push(ring[(s + k) % n]);
+    return out;
+  }
+  function prism(P, front, ring, inner, z0, z1) {
+    return {
+      sil: poly(hull(ringAt(P, ring, z1).concat(ringAt(P, ring, z0)))),
+      crease: inner ? open(ringAt(P, run(inner, front), z1)) : ""
+    };
+  }
+  var rings = (x0, y0, x1, y1, r, b) => [
+    rrect(x0, y0, x1, y1, r),
+    rrect(x0 + b, y0 + b, x1 - b, y1 - b, Math.max(0.3, r - b))
+  ];
+  function extremes(P, ring) {
+    const pr = ring.map((q) => P(q.u, q.v, 0));
+    let a = 0, b = 0, c = 0;
+    pr.forEach((p, k) => {
+      if (p[0] < pr[a][0]) a = k;
+      if (p[0] > pr[b][0]) b = k;
+      if (p[1] > pr[c][1]) c = k;
+    });
+    return [ring[a], ring[b], ring[c]];
+  }
+  function fillet(pts, rs, n = 4) {
+    const m = pts.length, out = [];
+    for (let i = 0; i < m; i++) {
+      const a = pts[(i + m - 1) % m], p = pts[i], b = pts[(i + 1) % m];
+      const la = Math.hypot(a[0] - p[0], a[1] - p[1]), lb = Math.hypot(b[0] - p[0], b[1] - p[1]);
+      const t = Math.min(rs[i], la / 2, lb / 2);
+      const p1 = [p[0] + (a[0] - p[0]) / la * t, p[1] + (a[1] - p[1]) / la * t];
+      const p2 = [p[0] + (b[0] - p[0]) / lb * t, p[1] + (b[1] - p[1]) / lb * t];
+      for (let k = 0; k <= n; k++) {
+        const s = k / n, w = 1 - s;
+        out.push([w * w * p1[0] + 2 * w * s * p[0] + s * s * p2[0], w * w * p1[1] + 2 * w * s * p[1] + s * s * p2[1]]);
+      }
+    }
+    return out;
+  }
+  function ghost(P, front, ring, z0, depth) {
+    const f = run(ring, front), lowP = ringAt(P, f, z0 - depth);
+    return {
+      d: open(lowP) + [f[0], f[f.length - 1]].map((q) => seg(P(q.u, q.v, z0), P(q.u, q.v, z0 - depth))).join(""),
+      y0: Math.min(...ringAt(P, f, z0).map((p) => p[1])),
+      y1: Math.max(...lowP.map((p) => p[1])) + 2
+    };
+  }
+
+  // packages/hairline/src/core/motion.ts
+  var reduced = false;
+  var setReducedMotion = (on) => {
+    reduced = on;
+  };
+  var reducedMotion = () => reduced;
+  function spring(x, o = {}) {
+    return { x, v: 0, t: x, k: o.k ?? 100, c: o.c ?? 18, m: o.m ?? 1, eps: o.eps ?? 0.01 };
+  }
+  function stepS(sp, dt) {
+    if (reduced) {
+      sp.x = sp.t;
+      sp.v = 0;
+      return false;
+    }
+    const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+    for (let i = 0; i < n; i++) {
+      const a = (-sp.k * (sp.x - sp.t) - sp.c * sp.v) / sp.m;
+      sp.v += a * h;
+      sp.x += sp.v * h;
+    }
+    if (Math.abs(sp.x - sp.t) < sp.eps && Math.abs(sp.v) < sp.eps * 10) {
+      sp.x = sp.t;
+      sp.v = 0;
+      return false;
+    }
+    return true;
+  }
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const X = (u) => ((ax * u + bx) * u + cx) * u;
+    const Y = (u) => ((ay * u + by) * u + cy) * u;
+    const dX = (u) => (3 * ax * u + 2 * bx) * u + cx;
+    return (t) => {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      let u = t;
+      for (let i = 0; i < 8; i++) {
+        const e = X(u) - t;
+        if (Math.abs(e) < 1e-5) break;
+        const d = dX(u);
+        if (Math.abs(d) < 1e-6) break;
+        u -= e / d;
+      }
+      if (!(u >= 0 && u <= 1) || Math.abs(X(u) - t) > 1e-4) {
+        let lo = 0, hi = 1;
+        u = t;
+        for (let i = 0; i < 24; i++) {
+          if (X(u) < t) lo = u;
+          else hi = u;
+          u = (lo + hi) / 2;
+        }
+      }
+      return Y(u);
+    };
+  }
+  var EASE_LIFT = bezier(0.32, 0.72, 0, 1);
+  var tween = (v, dur = 700) => ({ from: v, to: v, t0: -1e9, dur });
+  var tval = (tw, now) => {
+    const p = clamp((now - tw.t0) / tw.dur, 0, 1);
+    return tw.from + (tw.to - tw.from) * (reduced ? 1 : EASE_LIFT(p));
+  };
+  var tset = (tw, to, now, delay) => {
+    if (tw.to === to) return;
+    tw.from = tval(tw, now);
+    tw.to = to;
+    tw.t0 = now + delay;
+  };
+  var tdone = (tw, now) => reduced || now >= tw.t0 + tw.dur;
+
+  // packages/hairline/src/core/stage.ts
+  var NS = "http://www.w3.org/2000/svg";
+  function mk(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    if (attrs) for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function solid(parent) {
+    const g = mk("g", {}, parent);
+    return { g, sil: mk("path", { class: "sil" }, g), cr: mk("path", { class: "nf lo" }, g) };
+  }
+  var put = (el, s) => {
+    el.sil.setAttribute("d", s.sil);
+    el.cr.setAttribute("d", s.crease);
+  };
+  var flatDot = (parent, C, r, cls) => mk("ellipse", { rx: r2(r * C.S), ry: r2(r * C.S * C.k), class: cls }, parent);
+  var place = (el, q) => {
+    el.setAttribute("cx", String(r2(q[0])));
+    el.setAttribute("cy", String(r2(q[1])));
+  };
+  var fid = 0;
+  function fade(svg, y0, y1, a0 = 0.7) {
+    const id = "hl-fd" + ++fid, defs = mk("defs", {}, svg);
+    const lg = mk("linearGradient", { id: id + "g", gradientUnits: "userSpaceOnUse", x1: 0, y1: r2(y0), x2: 0, y2: r2(y1) }, defs);
+    mk("stop", { offset: 0, "stop-color": "#fff", "stop-opacity": a0 }, lg);
+    mk("stop", { offset: 1, "stop-color": "#fff", "stop-opacity": 0 }, lg);
+    const m = mk("mask", { id, maskUnits: "userSpaceOnUse", x: 0, y: 0, width: 400, height: 320 }, defs);
+    mk("rect", { x: 0, y: 0, width: 400, height: 320, fill: `url(#${id}g)` }, m);
+    return `url(#${id})`;
+  }
+  function reflect(svg, parent, P, front, ring, z0, depth) {
+    const r = ghost(P, front, ring, z0, depth);
+    const gh = mk("g", { class: "ghost", mask: fade(svg, r.y0, r.y1) }, parent);
+    mk("path", { d: r.d }, gh);
+  }
+  var boards = [];
+  var byStage = /* @__PURE__ */ new Map();
+  var raf = 0;
+  var last = 0;
+  var io = null;
+  var rm = null;
+  function frame(now) {
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1e3));
+    last = now;
+    let any = false;
+    for (const b of boards.slice()) if (b.vis && b.awake) {
+      try {
+        b.awake = !!b.tick(dt, now);
+      } catch (err) {
+        b.awake = false;
+        setTimeout(() => {
+          throw err;
+        });
+      }
+      any = any || b.awake;
+    }
+    raf = any ? requestAnimationFrame(frame) : 0;
+  }
+  function wake(b) {
+    b.awake = true;
+    if (!raf) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
+  }
+  var onMotion = () => {
+    setReducedMotion(!!rm?.matches);
+    boards.forEach(wake);
+  };
+  function start() {
+    if (io) return;
+    io = new IntersectionObserver((es) => {
+      for (const e of es) {
+        const set = byStage.get(e.target);
+        if (!set) continue;
+        for (const b of set) {
+          b.vis = e.isIntersecting;
+          if (b.vis) wake(b);
+        }
+      }
+    }, { rootMargin: "80px" });
+    rm = matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(rm.matches);
+    rm.addEventListener("change", onMotion);
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    io?.disconnect();
+    io = null;
+    rm?.removeEventListener("change", onMotion);
+    rm = null;
+  }
+  function register(stage, tick) {
+    start();
+    const b = { stage, tick, vis: false, awake: true };
+    boards.push(b);
+    const peers = byStage.get(stage);
+    if (peers) {
+      for (const p of peers) b.vis = p.vis;
+      peers.add(b);
+      if (b.vis) wake(b);
+    } else {
+      byStage.set(stage, /* @__PURE__ */ new Set([b]));
+      io.observe(stage);
+    }
+    tick(0, performance.now());
+    let gone = false;
+    return {
+      wake: () => {
+        if (!gone) wake(b);
+      },
+      unregister: () => {
+        if (gone) return;
+        gone = true;
+        boards = boards.filter((x) => x !== b);
+        const set = byStage.get(stage);
+        if (set) {
+          set.delete(b);
+          if (!set.size) {
+            byStage.delete(stage);
+            io?.unobserve(stage);
+          }
+        }
+        if (!boards.length) stop();
+      }
+    };
+  }
+  var handlers = /* @__PURE__ */ new WeakMap();
+  var touring = /* @__PURE__ */ new WeakMap();
+  function pointer(stage, on) {
+    handlers.set(stage, on);
+    let tm = 0;
+    const pt = (e) => {
+      const r = stage.getBoundingClientRect();
+      return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
+    };
+    const move = (e) => {
+      clearTimeout(tm);
+      touring.get(stage)?.hold();
+      on.move(pt(e), e);
+    };
+    const down = (e) => {
+      clearTimeout(tm);
+      touring.get(stage)?.hold();
+      if (e.pointerType !== "mouse") stage.releasePointerCapture?.(e.pointerId);
+      if (on.down) on.down(pt(e), e);
+      else on.move(pt(e), e);
+    };
+    const leave = (e) => {
+      clearTimeout(tm);
+      tm = window.setTimeout(() => {
+        on.leave(e);
+        touring.get(stage)?.release();
+      }, e.pointerType === "mouse" ? 0 : 1400);
+    };
+    stage.addEventListener("pointermove", move);
+    stage.addEventListener("pointerdown", down);
+    stage.addEventListener("pointerleave", leave);
+    return () => {
+      clearTimeout(tm);
+      if (handlers.get(stage) === on) handlers.delete(stage);
+      stage.removeEventListener("pointermove", move);
+      stage.removeEventListener("pointerdown", down);
+      stage.removeEventListener("pointerleave", leave);
+    };
+  }
+  var LAP = [[128, 150], [200, 118], [272, 150], [200, 206], null];
+  var TRAVEL = 900;
+  var DWELL = 1200;
+  var REST = 1800;
+  var RESUME = 1200;
+  var STAGGER = 450;
+  var GHOST = { pointerType: "ghost" };
+  var started = 0;
+  function entry([x, y]) {
+    const dx = x - 200, dy = y - 160;
+    if (!dx && !dy) return [200, 320];
+    const k = Math.min(dx ? (dx > 0 ? 200 : -200) / dx : Infinity, dy ? (dy > 0 ? 160 : -160) / dy : Infinity);
+    return [200 + dx * k, 160 + dy * k];
+  }
+  function tour(stage, stops, onStop) {
+    let i = 0;
+    let wait = RESUME + STAGGER * (started++ % 4);
+    let t = -1;
+    let at = null;
+    let origin = [200, 320];
+    let hand = false, keys = stage.contains(stage.ownerDocument.activeElement);
+    let gone = false;
+    const leave = () => {
+      at = null;
+      t = -1;
+      handlers.get(stage)?.leave(GHOST);
+    };
+    const tick = (dt) => {
+      if (hand || keys || !stops.length) return false;
+      if (reducedMotion()) {
+        if (at) leave();
+        return false;
+      }
+      if (wait > 0) {
+        wait -= dt * 1e3;
+        return true;
+      }
+      const stop2 = stops[i];
+      if (stop2 === null) {
+        if (at) leave();
+        onStop?.(i);
+        i = (i + 1) % stops.length;
+        wait = REST;
+        return true;
+      }
+      const h = handlers.get(stage);
+      if (!h) return true;
+      if (t < 0) {
+        origin = at ?? entry(stop2);
+        t = 0;
+      }
+      t = Math.min(TRAVEL, t + dt * 1e3);
+      const k = EASE_LIFT(t / TRAVEL);
+      at = [origin[0] + (stop2[0] - origin[0]) * k, origin[1] + (stop2[1] - origin[1]) * k];
+      h.move(at, GHOST);
+      if (t < TRAVEL) return true;
+      onStop?.(i);
+      i = (i + 1) % stops.length;
+      t = -1;
+      wait = DWELL;
+      return true;
+    };
+    const take = () => {
+      at = null;
+      t = -1;
+    };
+    const give = () => {
+      if (hand || keys) return;
+      i = 0;
+      t = -1;
+      wait = RESUME;
+      board.wake();
+    };
+    const me = {
+      hold: () => {
+        hand = true;
+        take();
+      },
+      release: () => {
+        if (!hand) return;
+        hand = false;
+        give();
+      }
+    };
+    const focusIn = () => {
+      keys = true;
+      take();
+    };
+    const focusOut = (e) => {
+      if (keys && !stage.contains(e.relatedTarget)) {
+        keys = false;
+        give();
+      }
+    };
+    stage.addEventListener("focusin", focusIn);
+    stage.addEventListener("focusout", focusOut);
+    touring.set(stage, me);
+    const board = register(stage, tick);
+    return {
+      stop: () => {
+        if (gone) return;
+        gone = true;
+        board.unregister();
+        stage.removeEventListener("focusin", focusIn);
+        stage.removeEventListener("focusout", focusOut);
+        if (touring.get(stage) === me) touring.delete(stage);
+        if (at) leave();
+      }
+    };
+  }
+  function disposer() {
+    let fns = [];
+    return {
+      add: (fn) => {
+        fns.push(fn);
+      },
+      on: (target, type, fn, opts) => {
+        const h = fn;
+        target.addEventListener(type, h, opts);
+        fns.push(() => target.removeEventListener(type, h, opts));
+      },
+      dispose: () => {
+        const run2 = fns;
+        fns = [];
+        for (let i = run2.length - 1; i >= 0; i--) run2[i]();
+      }
+    };
+  }
+
+  // packages/hairline/src/core/styles.ts
+  var LIGHT = { plate: "#ffffff", hi: "#232327", edge: "#a4a4ac", mid: "#c3c3c9", lo: "#e0e0e4" };
+  var DARK = { plate: "#08090a", hi: "#d0d6e0", edge: "#5b5d64", mid: "#3e3e44", lo: "#29292d" };
+  var KEYS = ["plate", "hi", "edge", "mid", "lo"];
+  var vars = (p) => KEYS.map((k) => `--hl-${k}:var(--hairline-${k},${p[k]});`).join("");
+  var EASE = "cubic-bezier(0.5,0,0.1,1)";
+  var SVG = ":where([data-hairline]>svg)";
+  function css(lightDark) {
+    const both = Object.fromEntries(KEYS.map((k) => [k, `light-dark(${LIGHT[k]},${DARK[k]})`]));
+    return [
+      // the box, and the palette: light unless something below says otherwise
+      `:where([data-hairline]){display:block;position:relative;aspect-ratio:5/4;touch-action:pan-y;user-select:none;-webkit-user-select:none;--hl-sw:var(--hairline-stroke,0.9);${vars(LIGHT)}}`,
+      // the page's color-scheme
+      lightDark ? `:where([data-hairline]){${vars(both)}}` : "",
+      // an ancestor that says dark
+      `:where(.dark,[data-theme="dark"]) :where([data-hairline]){${vars(DARK)}}`,
+      // the figure's own theme option
+      `:where([data-hairline][data-hairline-theme="light"]){${vars(LIGHT)}}`,
+      `:where([data-hairline][data-hairline-theme="dark"]){${vars(DARK)}}`,
+      `:where([data-hairline]:focus-visible){outline:1.5px solid var(--hl-hi);outline-offset:2px}`,
+      `${SVG}{position:absolute;inset:0;width:100%;height:100%;display:block}`,
+      // Riffle's live region: read, not seen
+      `:where([data-hairline]>[data-hairline-live]){position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}`,
+      // the drawing: plates are filled with the plate colour and painted back to front
+      `${SVG} :where(path,polygon,ellipse,line){fill:var(--hl-plate);stroke:var(--hl-mid);stroke-width:var(--hl-sw);vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;transition:stroke 260ms ${EASE}}`,
+      `${SVG} :where(.nf){fill:none}`,
+      `${SVG} :where(.fo){stroke:none}`,
+      `${SVG} :where(.sil){stroke:var(--hl-edge)}`,
+      `${SVG} :where(.hi){stroke:var(--hl-hi)}`,
+      `${SVG} :where(.lo){stroke:var(--hl-lo)}`,
+      `${SVG} :where(.dash){stroke-dasharray:1 3}`,
+      `${SVG} :where(.dot){stroke:none;fill:var(--hl-hi);transition:fill 260ms ${EASE}}`,
+      `${SVG} :where(.dot.m){fill:var(--hl-edge)}`,
+      `${SVG} :where(.dot.off){fill:var(--hl-lo)}`,
+      `${SVG} :where(.ghost path){fill:none;stroke:var(--hl-mid)}`
+    ].join("");
+  }
+  var done = /* @__PURE__ */ new WeakSet();
+  function inject(root) {
+    if (done.has(root)) return;
+    done.add(root);
+    const doc = root.nodeType === 9 ? root : root.ownerDocument;
+    const win = doc.defaultView;
+    const text = css(!!win?.CSS?.supports?.("color", "light-dark(#000,#fff)"));
+    if (win && "adoptedStyleSheets" in root) {
+      try {
+        const sheet = new win.CSSStyleSheet();
+        sheet.replaceSync(text);
+        root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
+        return;
+      } catch {
+      }
+    }
+    const style = doc.createElement("style");
+    style.setAttribute("data-hairline-style", "");
+    style.textContent = text;
+    (root.nodeType === 9 ? doc.head ?? doc.documentElement : root).appendChild(style);
+  }
+  return __toCommonJS(kernel_exports);
+})();
+/* /hairline kernel */
+</script>
+<script>window.FIGS=[];window.hairline=function(f){window.FIGS.push(f)};</script>
+<script id="hl-figure">
+(()=>{
+/**
+ * Bloom: a pegboard of 49 rounded pegs on a plinth. The pointer is projected
+ * back onto the ground, and each peg rises with its nearness to it, on its own
+ * spring. At rest the board holds a low ridge that runs corner to corner, with
+ * one tall peg. Pegs above half height take the bright stroke. The slider is
+ * the radius, in cells.
+ *
+ * The pattern: a continuous field, as Terrain, in a smaller board so it can sit
+ * beside a heading and follow a hand across a page.
+ */
+const {
+  Cam, clamp, facing, fit, prism, proj, rings, unproj, spring, stepS,
+  mk, pointer, put, register, disposer, solid,
+} = HL;
+
+const N = 7, CELL = 17, FOOT = 12, HMAX = 52, EXT = N * CELL, PB = 5;
+
+/** The share of full height at u radii from the pointer: 1 → .31 at 42% → .09 at the edge and beyond. */
+const falloff = (u) =>
+  u <= 0 ? 1 : u <= 0.417 ? 1 - (u / 0.417) * 0.6875 : u <= 1 ? 0.3125 - ((u - 0.417) / 0.583) * 0.2185 : 0.094;
+
+function mount({ stage, svg, read }, value) {
+  const bag = disposer();
+  const C = Cam(45, 0.5, 1.7);
+  fit(C, [[-6, -6, -PB], [EXT + 6, EXT + 6, -PB], [EXT + 6, -6, -PB], [-6, EXT + 6, -PB], [0, 0, HMAX * 0.8]], 200, 166);
+  const P = proj(C), front = facing(C);
+  let R = value * CELL, over = null;
+
+  const g = mk("g", {}, svg), cols = [];
+  const [pr, pi] = rings(-6, -6, EXT + 6, EXT + 6, 10, 2.2);
+  put(solid(g), prism(P, front, pr, pi, -PB, 0));
+  // Diagonal by diagonal from the back corner, so appending is painting back to front.
+  for (let s = 0; s <= 2 * (N - 1); s++) for (let i = 0; i < N; i++) {
+    const j = s - i;
+    if (j < 0 || j >= N) continue;
+    const u = i / (N - 1), v = j / (N - 1);
+    // a ridge along the anti-diagonal, and one tall peg off to one side
+    const h0 = 4 + 13 * Math.exp(-((u + v - 1) ** 2) / 0.05) + 24 * Math.exp(-((u - 0.7) ** 2 + (v - 0.3) ** 2) / 0.02);
+    const x0 = i * CELL + (CELL - FOOT) / 2, y0 = j * CELL + (CELL - FOOT) / 2;
+    const [ring, inner] = rings(x0, y0, x0 + FOOT, y0 + FOOT, 3.4, 1);
+    cols.push({ i, j, h0, ring, inner, sp: spring(h0, { eps: 0.04 }), el: solid(g), drawn: NaN });
+  }
+  const peak = cols.reduce((a, b) => (b.h0 > a.h0 ? b : a));
+
+  // A peg whose spring hasn't moved keeps its paths.
+  function drawCol(c) {
+    const h = Math.max(0.6, c.sp.x);
+    if (h === c.drawn) return;
+    c.drawn = h;
+    put(c.el, prism(P, front, c.ring, c.inner, 0, h));
+    c.el.sil.classList.toggle("hi", over ? h > HMAX * 0.5 : c === peak);
+  }
+
+  const B = register(stage, (dt) => {
+    let m = false;
+    for (const c of cols) { if (stepS(c.sp, dt)) m = true; drawCol(c); }
+    return m;
+  });
+  bag.add(B.unregister);
+
+  function retarget() {
+    for (const c of cols) {
+      if (!over) { c.sp.t = c.h0; c.drawn = NaN; continue; }
+      const dx = (c.i + 0.5) * CELL - over[0], dy = (c.j + 0.5) * CELL - over[1];
+      c.sp.t = HMAX * falloff(Math.hypot(dx, dy) / R);
+    }
+    if (over) read.textContent = `peg ${clamp(Math.floor(over[0] / CELL), 0, N - 1)}·${clamp(Math.floor(over[1] / CELL), 0, N - 1)}`;
+    else read.textContent = "rest";
+    B.wake();
+  }
+
+  bag.add(pointer(stage, {
+    move: (p) => { over = unproj(C, p[0], p[1], 0); retarget(); },
+    leave: () => { over = null; retarget(); },
+  }));
+  bag.add(() => svg.replaceChildren());
+
+  return {
+    set: (v) => { R = v * CELL; if (over) retarget(); },
+    destroy: bag.dispose,
+  };
+}
+
+hairline({
+  name: "bloom",
+  means: "A pegboard rises under the pointer, the nearest pegs tallest, and settles back into its ridge.",
+  rules: [1, 3, 5, 9],
+  range: [1.8, 3.2, 5],
+  tour: [[130, 150], [270, 150], [200, 200], null],
+  mount,
+});
+})();
+</script>
+<script>
+/* ---------- CONTENT (edit here) ---------- */
+const PROMPTS={"claude":[{"title":"Ultrathink","icon":"🧠","use":"Makes Claude think as hard as possible before answering a tough problem; \"ultrathink\" is a Claude Code keyword (in claude.ai, use the Extended thinking toggle instead).","prompt":"ultrathink\n\nI need to solve this problem: [DESCRIBE YOUR PROBLEM]\n\nThink it through carefully. Consider at least three different approaches, point out the risks of each, then recommend the best one and explain why in plain English.","tags":["thinking","reasoning","claude-code"]},{"title":"Deep Step-by-Step Reasoning","icon":"🪜","use":"Gets Claude to reason through a hard question step by step and keep its thinking separate from the final answer.","prompt":"Question: [YOUR QUESTION]\n\nFirst, think step by step inside \u003cthinking> tags. Check your own logic and look for mistakes. Then give your final answer, clearly and briefly, inside \u003canswer> tags.","tags":["reasoning","logic","accuracy"]},{"title":"Interview Me First","icon":"🎤","use":"Has Claude ask you smart questions before starting, so the result fits what you really want.","prompt":"I want help with: [YOUR GOAL]\n\nBefore you start, interview me. Ask me one question at a time (up to 8) to understand my needs, audience, and constraints. Wait for my answer each time. When you have enough, summarize what you learned and then do the task.","tags":["planning","questions","clarity"]},{"title":"Red-Team Then Improve","icon":"🛡️","use":"Makes Claude attack your idea or draft to find its weak spots, then fix them.","prompt":"Here is my [PLAN / DRAFT / IDEA]:\n\n[PASTE IT HERE]\n\nStep 1: Act as a tough critic and list the 5 biggest weaknesses or risks.\nStep 2: Rewrite it so each weakness is fixed.\nStep 3: Tell me what you changed and what is still uncertain.","tags":["critique","improve","review"]},{"title":"Summarize a Long Document","icon":"📄","use":"Turns a long document into a short, organized summary, using tags so Claude keeps the document and your instructions separate.","prompt":"\u003cdocument>\n[PASTE YOUR DOCUMENT HERE]\n\u003c/document>\n\nSummarize the document above. Give me:\n1. A 2-sentence overview\n2. The 5 key points as bullets\n3. Any action items or deadlines\n\nUse only what is in the document. If something is unclear, say so.","tags":["summary","documents","xml"]},{"title":"Explain Like I'm 12","icon":"🧒","use":"Explains any tricky topic in simple words with everyday examples.","prompt":"Explain [TOPIC] like I'm 12 years old. Use simple words, one everyday analogy, and a short example. Avoid jargon, or explain it when you must use it. End with 3 quick questions so I can check that I understood.","tags":["learning","simple","explain"]},{"title":"Decision Helper","icon":"⚖️","use":"Lays out the pros and cons of a choice and helps you pick one.","prompt":"I'm deciding between: [OPTION A] and [OPTION B].\nWhat matters most to me: [YOUR PRIORITIES]\n\nGive me a pros and cons list for each option, then score them against my priorities. Point out anything I may be overlooking, make a recommendation, and say what would change your mind.","tags":["decisions","pros-cons","life"]},{"title":"Rewrite in My Voice","icon":"✍️","use":"Rewrites text so it sounds like you wrote it, based on a sample of your own writing.","prompt":"Here is a sample of my writing:\n\u003csample>\n[PASTE 1-2 PARAGRAPHS YOU WROTE]\n\u003c/sample>\n\nStudy my tone, sentence length, and word choices. Now rewrite this text in my voice, keeping the meaning the same:\n\u003ctext>\n[PASTE TEXT TO REWRITE]\n\u003c/text>","tags":["writing","style","rewrite"]},{"title":"Plan Before You Build","icon":"🗺️","use":"Makes Claude Code write a plan and wait for your approval before it changes any files.","prompt":"I want to build: [DESCRIBE THE FEATURE OR PROJECT]\n\nDo not write or change any code yet. First explore the existing project, then give me a step-by-step plan: which files you would change, what could go wrong, and how we will test it. Wait for my approval before starting.","tags":["coding","planning","claude-code"]},{"title":"Code Review","icon":"🔍","use":"Gets Claude to check code for bugs, security problems, and messy parts, and explain them clearly.","prompt":"Review this code like a careful senior developer:\n\n[PASTE CODE OR NAME THE FILE]\n\nList problems in order of importance: bugs, security issues, confusing code, and missing tests. For each, explain why it matters in plain English and show a suggested fix.","tags":["coding","review","bugs"]},{"title":"Fan Out Subagents","icon":"🕸️","use":"Asks Claude Code to hand separate jobs to several helper agents at the same time and then combine what they find.","prompt":"Task: [DESCRIBE THE BIG TASK]\n\nBreak this into independent subtasks that do not depend on each other. Spawn a separate subagent for each one and run them in parallel. When they finish, merge their results into one clear report and point out any conflicts between them.","tags":["subagents","parallel","claude-code"]},{"title":"Research and Verify Sources","icon":"🔎","use":"Has Claude research a topic, separate facts from guesses, and tell you which claims need checking.","prompt":"Research: [TOPIC OR QUESTION]\n\nGive me the key findings. For every claim, name the source and say how confident you are. Mark anything you are unsure of or cannot verify. Do not invent sources or links. End with a list of claims I should double-check myself.","tags":["research","sources","accuracy"]}],"openai":[{"title":"Role-Task-Context-Format Recipe","icon":"🧱","use":"Gives you a simple fill-in-the-blanks structure that makes almost any request clearer and more useful.","prompt":"Role: Act as [ROLE, e.g. a friendly career coach].\nTask: [WHAT YOU WANT DONE].\nContext: [BACKGROUND, WHO IT IS FOR, WHAT YOU HAVE TRIED].\nFormat: Give the answer as [FORMAT, e.g. 5 bullet points under 100 words].","tags":["basics","structure","template"]},{"title":"Ask Me Questions First","icon":"❓","use":"Makes ChatGPT find out what it is missing before answering, so you get fewer generic replies.","prompt":"I want help with: [YOUR GOAL].\nBefore you answer, ask me up to 5 clarifying questions, one list at a time, about anything you need to know to do this well. Wait for my replies. Then give me your best answer based on what I told you.","tags":["questions","accuracy","basics"]},{"title":"Deep Research Report","icon":"🔎","use":"Asks ChatGPT to research a topic across many web sources and write a cited report.","prompt":"(Turn on Deep research in ChatGPT first.)\nResearch [TOPIC] for [WHO IT IS FOR, e.g. a beginner].\nFocus on [SPECIFIC QUESTION OR ANGLE] and prefer recent, reliable sources.\nWrite a report with a short summary, key findings, points where sources disagree, and a list of sources with links.","tags":["research","deep research","sources"]},{"title":"Custom Instructions Starter","icon":"⚙️","use":"Helps you write the text for ChatGPT's Custom Instructions so every chat already knows how you like answers.","prompt":"Help me write Custom Instructions for ChatGPT. Ask me a few questions about who I am, what I use ChatGPT for, and how I like answers (tone, length, level of detail). Then write two short pieces of text I can paste into the Custom Instructions boxes in Settings: one about me, one about how you should respond.","tags":["setup","personalize","settings"]},{"title":"Critique Then Rewrite","icon":"✍️","use":"Gets honest feedback on your writing first, then an improved version that fixes the problems.","prompt":"Here is my text:\n[PASTE TEXT]\n\nStep 1: Critique it honestly for clarity, tone, and structure for [AUDIENCE]. List the 3 biggest problems.\nStep 2: Rewrite it to fix those problems, keeping my voice and meaning.\nStep 3: Briefly say what you changed.","tags":["writing","editing","feedback"]},{"title":"Study Tutor Quiz","icon":"🎓","use":"Turns ChatGPT into a patient tutor that quizzes you one question at a time.","prompt":"Act as a patient tutor. Quiz me on [TOPIC] at [LEVEL, e.g. beginner] level.\nAsk one question at a time and wait for my answer. After each answer, tell me if I was right, explain briefly, then ask the next question, making it easier or harder based on how I am doing. After 10 questions, summarize what I should review.","tags":["study","quiz","learning"]},{"title":"Email or Cover Letter Writer","icon":"📧","use":"Drafts a polite, clear email or cover letter from a few details you provide.","prompt":"Write a [EMAIL or COVER LETTER] to [RECIPIENT OR COMPANY] about [PURPOSE].\nKey points to include: [POINTS].\nAbout me: [SHORT BACKGROUND].\nTone: [e.g. warm and professional]. Keep it under [WORD COUNT] words. Give me a subject line too, and do not invent facts about me.","tags":["writing","email","career"]},{"title":"Data Table Maker","icon":"📊","use":"Turns messy notes or lists into a neat table you can copy into a spreadsheet.","prompt":"Turn the information below into a table with these columns: [COLUMN 1], [COLUMN 2], [COLUMN 3].\nIf something is missing, write \"unknown\" instead of guessing. Sort the rows by [COLUMN].\n\nInformation:\n[PASTE NOTES OR LIST]","tags":["tables","organize","data"]},{"title":"Decision Matrix","icon":"⚖️","use":"Helps you compare options fairly by scoring them on the things that matter to you.","prompt":"Help me choose between: [OPTION A], [OPTION B], [OPTION C].\nMy goal: [GOAL]. Constraints: [BUDGET, TIME, ETC].\nAsk me which criteria matter most, or suggest 5 and let me adjust. Then make a table scoring each option from 1 to 5 per criterion, with weights, a total, and a short recommendation.","tags":["decisions","compare","planning"]},{"title":"Meeting Notes to Action Items","icon":"✅","use":"Turns rambling meeting notes into a clear summary and a to-do list with owners.","prompt":"Here are my meeting notes:\n[PASTE NOTES OR TRANSCRIPT]\n\nGive me: 1) a 3-sentence summary, 2) decisions made, 3) a table of action items with owner and due date (write \"unclear\" if not stated), 4) open questions.","tags":["meetings","productivity","summary"]},{"title":"Codex: Plan Before Editing","icon":"🧭","use":"Tells the Codex coding agent to make a plan and wait for your approval before changing any files.","prompt":"Task: [DESCRIBE THE CHANGE OR BUG].\nFirst, read the relevant files and explain your plan: which files you would change and why, and how we will check it works (tests or commands to run). Do not edit anything yet. Wait for my approval, then make the smallest change that works and tell me how to verify it.","tags":["codex","coding","planning"]},{"title":"Codex: Split Into Parallel Tasks","icon":"🔀","use":"Helps you break a big coding job into small, separate tasks that Codex can work on at the same time.","prompt":"Big goal: [DESCRIBE THE PROJECT OR FEATURE].\nDo not write code yet. Split this into small, independent tasks that touch different files so they will not conflict if run at the same time. For each task give a title, a one-paragraph instruction I can paste into a separate Codex task, and what \"done\" looks like. Note any task that must wait for another.","tags":["codex","coding","parallel"]},{"title":"Reasoning Model Goal Prompt","icon":"🎯","use":"A short, goal-focused prompt for OpenAI's reasoning models, which work best when you state the outcome and skip the hand-holding.","prompt":"Goal: [WHAT YOU WANT TO ACHIEVE].\nContext: [KEY FACTS ONLY].\nConstraints: [LIMITS, e.g. budget, deadline].\nGive me the best answer and a brief explanation of why.","tags":["reasoning","simple","goals"]}],"gemini":[{"title":"Expert Helper (Persona + Task + Context + Format)","icon":"🎯","use":"Gets a focused, well-shaped answer by telling Gemini who to be, what to do, your situation, and how to reply.","prompt":"Act as [A ROLE, e.g. a friendly career coach].\nTask: [WHAT YOU WANT DONE].\nContext: [YOUR SITUATION, GOAL, AND ANYTHING IMPORTANT].\nFormat: [e.g. 5 bullet points, under 200 words, plain English].\nIf you need more information from me, ask up to 3 questions first.","tags":["basics","persona","format"]},{"title":"Analyze a Long Document","icon":"📚","use":"Lets Gemini read a big document or several files you upload and pull out what matters.","prompt":"I have attached [DOCUMENT NAME(S)]. Read everything carefully, then give me:\n1. A 5-sentence summary\n2. The 7 most important points\n3. Anything unclear, risky, or contradictory\n4. Questions I should ask about it\nWhen you cite something, mention which section or page it came from. If something is not in the document, say so.","tags":["documents","summary","analysis"]},{"title":"Compare Two Options in a Table","icon":"⚖️","use":"Helps you choose between two things by laying out the differences side by side.","prompt":"Compare [OPTION A] and [OPTION B] for someone who [YOUR SITUATION, e.g. is a beginner on a budget].\nMake a table with rows for: price, ease of use, pros, cons, and best for.\nAfter the table, recommend one in 2 sentences and explain why.\nTell me if any detail may be out of date or that I should double-check.","tags":["compare","decisions","table"]},{"title":"Personal Learning Plan","icon":"🗓️","use":"Builds a simple step-by-step plan for learning any new skill at your pace.","prompt":"I want to learn [SKILL OR TOPIC]. I am a [BEGINNER/INTERMEDIATE] and can study [HOURS] per week for [NUMBER] weeks.\nCreate a week-by-week plan with a small goal, what to practice, and one free resource type for each week.\nEnd with a simple way to test my progress.","tags":["learning","plan","study"]},{"title":"Summarize a Link","icon":"🔗","use":"Turns a YouTube video or web article into a short summary with key takeaways.","prompt":"Summarize this link: [PASTE URL]\nGive me: a 3-sentence overview, the key points as bullets, and any action steps.\nIf you cannot open or watch it, tell me clearly and ask me to paste the text or transcript instead. Do not guess what it says.","tags":["summary","youtube","articles"]},{"title":"Brainstorm 10 Then Rank","icon":"💡","use":"Generates plenty of ideas, then picks the best ones so you are not left guessing.","prompt":"Brainstorm 10 ideas for [GOAL OR PROBLEM]. My limits: [BUDGET, TIME, SKILLS].\nThen rank them from best to worst using these criteria: [e.g. easy to start, low cost, fun].\nShow a table with the idea, a score out of 10, and a one-line reason. Finish by recommending your top 2.","tags":["ideas","brainstorm","ranking"]},{"title":"Gemini CLI: Plan Before Coding","icon":"🧭","use":"Makes Gemini CLI think through a plan first, so it does not change your files before you approve.","prompt":"I want to [DESCRIBE THE FEATURE OR FIX] in this project.\nDo NOT edit any files yet. First, read the relevant files and write a step-by-step plan: which files you will change, what you will change in each, and any risks.\nAsk me questions if anything is unclear. Wait for my approval before making changes.","tags":["gemini-cli","coding","planning"]},{"title":"Gemini CLI: GEMINI.md Starter Rules","icon":"📝","use":"Creates a GEMINI.md file, the project instructions file Gemini CLI reads, so it follows your rules every time.","prompt":"Look at this project and create a GEMINI.md file in the project root with short instructions for yourself. Include:\n- What this project does (2 sentences)\n- Languages, tools, and how to run it\n- Coding style rules: [YOUR PREFERENCES]\n- Always explain changes in plain English\n- Ask before deleting files or installing new packages\nKeep it under 30 lines.","tags":["gemini-cli","gemini-md","setup"]},{"title":"Fact-Check My Draft","icon":"🔍","use":"Checks your writing for claims that may be wrong or need a source before you share it.","prompt":"Fact-check the draft below. List each factual claim, then label it: likely correct, uncertain, or likely wrong. For anything uncertain or wrong, explain why and suggest a fix or what source I should check. Do not invent sources. Do not rewrite my text unless I ask.\n\nDRAFT:\n[PASTE YOUR TEXT]","tags":["fact-check","writing","accuracy"]},{"title":"Step-by-Step Explainer","icon":"🪜","use":"Explains a confusing topic in small, simple steps with everyday examples.","prompt":"Explain [TOPIC] to me like I am a complete beginner with no background.\nUse simple words, one everyday analogy, and numbered steps.\nAfter each step, give a short example. Then ask me 3 quick questions to check I understood, and wait for my answers.","tags":["explain","beginner","learning"]}]};
+const GH="https://github.com/";
+/* sec: mods | skills | new | trending ; prov: claude | openai | gemini ; cmd = copy-paste "how to get it" */
+const DATA=[
+/* ===== MODS & UPGRADES ===== */
+{sec:"mods",prov:["claude"],title:"Claude in Chrome",desc:"Lets Claude use websites for you inside your browser: fill forms, compare pages, gather info.",url:"https://docs.claude.com",tags:["browser","extension"]},
+{sec:"mods",prov:["claude"],title:"Claude in Excel and PowerPoint",desc:"Claude works inside your spreadsheets and slide decks to clean data, build formulas and draft slides.",url:"https://docs.claude.com",tags:["excel","powerpoint","office"]},
+{sec:"mods",prov:["claude"],title:"Claude Cowork and Claude Tag",desc:"Cowork is a desktop app where Claude does everyday work tasks. Tag lets your team hand tasks to @Claude in Slack.",url:"https://claude.com/docs/claude-tag/overview",tags:["desktop","slack","teamwork"]},
+{sec:"mods",prov:["claude"],title:"Claude Code plugins",desc:"One-step bundles of skills and commands for Claude Code. Add a collection from GitHub, then install what you like.",url:"https://docs.claude.com",cmd:"/plugin marketplace add <github-url>",tags:["plugins","claude code"]},
+{sec:"mods",prov:["openai"],title:"Codex plugin marketplaces",desc:"Add skill collections to Codex straight from GitHub, then call them by name.",url:GH+"openai/codex",cmd:"codex plugin marketplace add patinaproject/skills",tags:["plugins","codex"]},
+{sec:"mods",prov:["openai"],title:"Codex desktop app (Mac and Windows)",desc:"A friendly window for Codex, so you don't need the terminal. Connect GitHub in settings.",url:GH+"openai/codex",tags:["app","no terminal"]},
+{sec:"mods",prov:["gemini"],title:"Gemini CLI extensions",desc:"Add community and partner extensions to Gemini CLI with one command and a GitHub link.",url:"https://geminicli.com/docs/changelogs",cmd:"gemini extensions install <github-url>",tags:["extensions"]},
+{sec:"mods",prov:["gemini"],title:"Conductor extension",desc:"Helps Gemini CLI plan before it builds, keeping work organised and on track.",url:GH+"gemini-cli-extensions/conductor",cmd:"gemini extensions install https://github.com/gemini-cli-extensions/conductor",tags:["planning","workflow"]},
+{sec:"mods",prov:["gemini"],title:"Browserbase web extension",desc:"Lets Gemini CLI open web pages, take screenshots and pull out information.",url:GH+"browserbase/mcp-server-browserbase",cmd:"gemini extensions install https://github.com/browserbase/mcp-server-browserbase",tags:["browser","web"]},
+{sec:"mods",prov:["gemini"],title:"Gemini CLI preview channel",desc:"Try new Gemini CLI features early, such as experimental skills. May be less stable.",url:"https://geminicli.com/docs/changelogs",cmd:"npm install -g @google/gemini-cli@preview",tags:["early access"]},
+{sec:"mods",prov:["gemini"],title:"google/agents-cli",desc:"Google's command-line tool for building and running AI agents.",url:GH+"google/agents-cli",tags:["google","cli"]},
+
+/* ===== SKILLS ===== */
+{sec:"skills",prov:["claude"],title:"Document skills: Word, PDF, PowerPoint, Excel",desc:"Built into Claude. Ask it to create or edit Word documents, PDFs, slide decks and spreadsheets.",url:"https://docs.claude.com",tags:["word","pdf","slides","excel","beginner friendly"]},
+{sec:"skills",prov:["claude"],title:"anthropics/skills",desc:"Anthropic's official skills collection. Each skill is a folder of instructions for one kind of job.",url:GH+"anthropics/skills",tags:["official","SKILL.md"]},
+{sec:"skills",prov:["claude"],title:"frontend-design and skill-creator",desc:"Make better-looking websites and apps, and build your own custom skills.",url:"https://docs.claude.com",tags:["design","make your own"]},
+{sec:"skills",prov:["claude","gemini"],title:"obra/superpowers",desc:"A popular set of habits for AI coders: plan first, test, review. Also installs in Gemini CLI.",url:GH+"obra/superpowers",cmd:"gemini extensions install https://github.com/obra/superpowers",tags:["engineering","method"]},
+{sec:"skills",prov:["claude"],title:"mattpocock/skills",desc:"Skills that make coding agents follow good engineering practice and respect how a project is organised.",url:GH+"mattpocock/skills",tags:["engineering"]},
+{sec:"skills",prov:["claude"],title:"addyosmani/agent-skills",desc:"Production-quality engineering skills for AI coding agents.",url:GH+"addyosmani/agent-skills",tags:["engineering"]},
+{sec:"skills",prov:["claude"],title:"multica-ai/andrej-karpathy-skills",desc:"Skills inspired by AI researcher Andrej Karpathy's way of working.",url:GH+"multica-ai/andrej-karpathy-skills",tags:["community"]},
+{sec:"skills",prov:["claude"],title:"microsoft/cat-agent-skills",desc:"Business-focused skills with a gallery, usable as Claude Cowork plugins.",url:GH+"microsoft/cat-agent-skills",tags:["business","cowork"]},
+{sec:"skills",prov:["claude","openai","gemini"],title:"skills.sh (vercel-labs/skills)",desc:"Like an app store for skills. Browse a big directory and install any skill from GitHub with one command.",url:"https://skills.sh",cmd:"npx skills add <owner/repo>",tags:["installer","directory","all AIs"]},
+{sec:"skills",prov:["claude"],title:"Aradotso/devtools-skills",desc:"Skills made automatically from fast-growing developer tools.",url:GH+"Aradotso/devtools-skills",cmd:"npx skills add Aradotso/devtools-skills",tags:["auto-generated"]},
+{sec:"skills",prov:["openai"],title:"Codex built-in skills",desc:"Codex can use skills too. It includes helpers to create and install your own.",url:GH+"openai/codex",cmd:"npm i -g @openai/codex",tags:["codex","make your own"]},
+{sec:"skills",prov:["openai"],title:"agenticapps-eu/codex-workflow",desc:"A 'write the plan first, then build' routine for Codex, ready to install.",url:GH+"agenticapps-eu/codex-workflow",tags:["workflow"]},
+{sec:"skills",prov:["openai"],title:"mturac/everything-openai-codex",desc:"A big bundle of skills, rules and safety checks for Codex. Also works in other coding tools.",url:GH+"mturac/everything-openai-codex",cmd:"/plugin marketplace add https://github.com/mturac/everything-openai-codex",tags:["bundle","safety"]},
+{sec:"skills",prov:["openai"],title:"kousen/codex-training",desc:"A hands-on course for learning Codex step by step, including making your own skills.",url:GH+"kousen/codex-training",tags:["learning","course"]},
+{sec:"skills",prov:["gemini"],title:"Gemini CLI Agent Skills",desc:"Official skills support in Gemini CLI. Add a skill file, then run /skills list to check it was found.",url:"https://geminicli.com/docs/cli/skills/",tags:["official"]},
+{sec:"skills",prov:["claude","gemini"],title:"echo-skill/echoskill",desc:"Skills that work in both Claude Code and Gemini CLI, including writing skills and handling GitHub issues.",url:GH+"echo-skill/echoskill",cmd:"gemini skills install https://github.com/echo-skill/echoskill.git --path coding",tags:["cross-platform"]},
+{sec:"skills",prov:["gemini"],title:"gemini-extension-development",desc:"A skill that helps you create, test and share your own Gemini CLI extensions.",url:"https://www.skills.sh/melodic-software/claude-code-plugins/gemini-extension-development",tags:["make your own"]},
+
+/* ===== NEW REPOS ===== */
+{sec:"new",prov:["claude"],title:"Egonex-AI/Understand-Anything",desc:"Flagged as new in 2026 on a popular AI-skills chart.",url:GH+"Egonex-AI/Understand-Anything",tags:["skills"]},
+{sec:"new",prov:["claude"],title:"cathrynlavery/diagram-design",desc:"Skills for creating clean diagrams.",url:GH+"cathrynlavery/diagram-design",tags:["design","diagrams"]},
+{sec:"new",prov:["claude"],title:"ayghri/i-have-adhd",desc:"Trims long-winded AI replies down to just the answer.",url:GH+"ayghri/i-have-adhd",tags:["short answers"]},
+{sec:"new",prov:["openai"],title:"openai/openai-cli",desc:"A fast-growing command-line tool from OpenAI.",url:GH+"openai/openai-cli",tags:["cli"]},
+{sec:"new",prov:["claude","openai","gemini"],title:"jackwener/OpenCLI",desc:"One hub for many command-line tools.",url:GH+"jackwener/OpenCLI",tags:["cli","tools"]},
+{sec:"new",prov:["claude","openai","gemini"],title:"iOfficeAI/OfficeCLI",desc:"Automate Office-style documents from the command line.",url:GH+"iOfficeAI/OfficeCLI",tags:["office","automation"]},
+{sec:"new",prov:["claude","openai","gemini"],title:"Kaboom Browser AI Devtools",desc:"Gives AI assistants access to browser developer tools, so they can inspect and fix web pages.",url:GH+"brennhill/Kaboom-Browser-AI-Devtools-MCP",tags:["browser","web"]},
+
+/* ===== TRENDING ===== */
+{sec:"trending",prov:["claude"],title:"mattpocock/skills",stat:"about 277K stars",desc:"Skills for real engineers. Top of the October 2026 trending list.",url:GH+"mattpocock/skills",tags:["skills"]},
+{sec:"trending",prov:["claude","openai","gemini"],title:"openclaw/openclaw",stat:"about 385K stars",desc:"A personal AI assistant that runs on your own device and uses skills.",url:GH+"openclaw/openclaw",tags:["assistant","local-first"]},
+{sec:"trending",prov:["claude","gemini"],title:"obra/superpowers",stat:"Top skills collection",desc:"Keeps appearing in 'best skills' lists.",url:GH+"obra/superpowers",tags:["skills"]},
+{sec:"trending",prov:["claude"],title:"addyosmani/agent-skills",stat:"#4 on a skills chart",desc:"Production-quality skills for AI coding agents.",url:GH+"addyosmani/agent-skills",tags:["skills"]},
+{sec:"trending",prov:["claude","openai","gemini"],title:"Mintplex-Labs/anything-llm",stat:"about 64K stars",desc:"Chat with your own documents in a desktop app.",url:GH+"Mintplex-Labs/anything-llm",tags:["your documents","local"]},
+{sec:"trending",prov:["openai"],title:"openai/codex",stat:"Core project",desc:"OpenAI's open-source coding assistant.",url:GH+"openai/codex",tags:["codex"]},
+{sec:"trending",prov:["gemini"],title:"google-gemini/gemini-cli",stat:"Core project",desc:"Google's open-source Gemini assistant for the terminal.",url:GH+"google-gemini/gemini-cli",tags:["gemini cli"]},
+{sec:"trending",prov:["claude"],title:"anthropics/claude-code",stat:"Core project",desc:"Anthropic's coding assistant for the terminal and your editor.",url:GH+"anthropics/claude-code",tags:["claude code"]}
+];
+
+/* type: slash = typed in a tool, phrase = works in any chat */
+const CMDS=[
+{prov:["claude"],type:"slash",cmd:"/help",what:"Shows every command you can use in Claude Code.",tags:["start here"]},
+{prov:["claude"],type:"slash",cmd:"/init",what:"Scans your project and writes a notes file (CLAUDE.md) so Claude knows how it works.",tags:["setup","memory"]},
+{prov:["claude"],type:"slash",cmd:"/clear",what:"Starts a fresh chat. Use it when switching to a different task.",tags:["reset"]},
+{prov:["claude"],type:"slash",cmd:"/compact",what:"Shrinks a long chat into a summary so Claude keeps its focus and you save space.",tags:["long chats"]},
+{prov:["claude"],type:"slash",cmd:"/model",what:"Switch between Claude models, for example faster or smarter.",tags:["settings"]},
+{prov:["claude"],type:"slash",cmd:"/memory",what:"View and edit what Claude remembers about you and your project.",tags:["memory"]},
+{prov:["claude"],type:"slash",cmd:"/mcp",what:"Connect Claude to outside apps and tools.",tags:["connections"]},
+{prov:["claude"],type:"slash",cmd:"/agents",what:"Create and manage helper agents for specific jobs.",tags:["advanced"]},
+{prov:["claude"],type:"slash",cmd:"/plugin",what:"Browse and install plugin bundles of skills and commands.",tags:["plugins","skills"]},
+{prov:["claude"],type:"slash",cmd:"/resume",what:"Pick up an earlier conversation where you left off.",tags:["history"]},
+{prov:["openai"],type:"slash",cmd:"/init",what:"Codex creates an AGENTS.md notes file with rules for your project.",tags:["setup"]},
+{prov:["openai"],type:"slash",cmd:"/model",what:"Choose which model Codex uses.",tags:["settings"]},
+{prov:["openai"],type:"slash",cmd:"/review",what:"Asks Codex to review your changes and point out problems.",tags:["quality"]},
+{prov:["openai"],type:"slash",cmd:"/new",what:"Start a new conversation in the same session.",tags:["reset"]},
+{prov:["openai"],type:"slash",cmd:"/compact",what:"Summarise the chat so far to free up space.",tags:["long chats"]},
+{prov:["openai"],type:"slash",cmd:"/diff",what:"Shows what files Codex has changed.",tags:["review"]},
+{prov:["openai"],type:"slash",cmd:"/status",what:"Shows the current model and session settings.",tags:["info"]},
+{prov:["openai"],type:"slash",cmd:"/mention",what:"Point Codex at a particular file or folder.",tags:["files"]},
+{prov:["gemini"],type:"slash",cmd:"/help",what:"Lists the commands in Gemini CLI.",tags:["start here"]},
+{prov:["gemini"],type:"slash",cmd:"/clear",what:"Clears the screen and chat to start fresh.",tags:["reset"]},
+{prov:["gemini"],type:"slash",cmd:"/memory",what:"See or edit the notes Gemini remembers for your project.",tags:["memory"]},
+{prov:["gemini"],type:"slash",cmd:"/tools",what:"Lists the tools Gemini can use right now.",tags:["info"]},
+{prov:["gemini"],type:"slash",cmd:"/extensions",what:"Shows installed extensions.",tags:["extensions"]},
+{prov:["gemini"],type:"slash",cmd:"/skills list",what:"Confirms Gemini found your installed skills.",tags:["skills"]},
+{prov:["gemini"],type:"slash",cmd:"/mcp",what:"Shows connected outside tools.",tags:["connections"]},
+{prov:["gemini"],type:"slash",cmd:"/settings",what:"Opens the settings, where you can turn on experimental features.",tags:["settings"]},
+{prov:["gemini"],type:"slash",cmd:"/compress",what:"Shrinks a long chat into a summary.",tags:["long chats"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Ask me questions first.",what:"Makes the AI interview you before it answers, so the result fits better.",tags:["clarify"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Explain it like I'm 12.",what:"Gets a simple, jargon-free explanation of anything.",tags:["simple","learn"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Summarize in 5 bullet points.",what:"Quick summary of a long text you paste in.",tags:["summary"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Give me 3 options with pros and cons.",what:"Helps you decide instead of getting one answer.",tags:["decisions"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Critique your answer, then rewrite it better.",what:"A free second pass that catches weak points.",tags:["quality","revise"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"What could go wrong with this plan?",what:"Stress-tests your idea before you commit to it.",tags:["plans","risk"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Keep it short. No filler.",what:"Cuts the waffle and gives you the answer.",tags:["short answers"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"If you're not sure, say so. Don't guess.",what:"Lowers the chance of confident-sounding mistakes.",tags:["accuracy"]},
+{prov:["claude","openai","gemini"],type:"phrase",cmd:"Turn this into a table.",what:"Organises messy information into rows and columns.",tags:["format"]},
+{prov:["openai"],type:"phrase",cmd:"Remember that I prefer short, simple answers.",what:"In ChatGPT this can save a preference to Memory for future chats.",tags:["memory","ChatGPT"]},
+{prov:["openai"],type:"phrase",cmd:"Search the web for the latest on …",what:"Pushes ChatGPT to use live web results for up-to-date facts.",tags:["search","ChatGPT"]}
+];
+
+/* ---------- ENGINE ---------- */
+const PROVS=[{id:"all",label:"All AIs"},{id:"claude",label:"Claude"},{id:"openai",label:"ChatGPT / OpenAI"},{id:"gemini",label:"Gemini"}];
+const PLABEL={claude:"Claude",openai:"OpenAI",gemini:"Gemini"};
+const SUBS=[
+ {id:"mods",label:"Mods & upgrades",help:"Add-ons that give your AI new powers."},
+ {id:"skills",label:"Skills",help:"Instruction packs that teach your AI how to do specific jobs well."},
+ {id:"new",label:"New on GitHub",help:"Recently spotted projects. Newer means less proven, so read before you install."},
+ {id:"trending",label:"Trending",help:"What lots of people are starring right now."}
+];
+const VIEWS=[{id:"start",label:"Start here"},{id:"skills",label:"Skills & add-ons"},{id:"prompts",label:"Prompts"},{id:"cmds",label:"Commands"}];
+const S={view:"start",sub:"mods",prov:"all",pp:"claude",q:{qs:"",qp:"",qc:""}};
+const $=s=>document.querySelector(s);
+const terms=q=>q.toLowerCase().split(/\s+/).filter(Boolean);
+function mk(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function has(i,t,extra){
+  if(!t.length)return true;
+  const h=(extra(i)+" "+(i.tags||[]).join(" ")+" "+i.prov.map(p=>PLABEL[p]).join(" ")).toLowerCase();
+  return t.every(x=>h.includes(x));
+}
+function hl(el,text,t){
+  el.textContent="";
+  if(!t.length){el.textContent=text;return}
+  const re=new RegExp("("+t.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")","gi");
+  text.split(re).forEach((part,k)=>{
+    if(k%2===1){el.appendChild(mk("mark",null,part))}
+    else el.appendChild(document.createTextNode(part));
+  });
+}
+function copy(btn,text){
+  btn.dataset.l=btn.dataset.l||btn.textContent;
+  const done=()=>{btn.textContent="Copied";setTimeout(()=>btn.textContent=btn.dataset.l,1300)};
+  const fallback=()=>{try{const a=mk("textarea");a.value=text;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}catch(e){}done()};
+  try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
+}
+function cmdBox(text,pre){
+  const w=mk("div","cmd"),c=mk(pre?"pre":"code",null,text),b=mk("button","copy","Copy");
+  b.type="button";b.onclick=()=>copy(b,text);w.append(c,b);return w;
+}
+function provBadges(p){const b=mk("div","badges");p.forEach(x=>b.appendChild(mk("span","badge "+x,PLABEL[x])));return b}
+function fill(grid,list,build,t){
+  grid.textContent="";
+  if(!list.length){grid.appendChild(mk("div","empty","Nothing matched. Try a simpler word like “pdf”, “short” or “example”, or switch the AI filter to All."));return}
+  list.forEach((i,k)=>{const c=build(i,t);c.style.setProperty('--i',Math.min(k,12));grid.appendChild(c)});
+}
+function chips(el){
+  el.textContent="";
+  PROVS.forEach(p=>{
+    const b=mk("button","chip");b.type="button";b.dataset.p=p.id;
+    b.setAttribute("aria-pressed",String(S.prov===p.id));
+    b.append(mk("span","dot"),document.createTextNode(p.label));
+    b.onclick=()=>{S.prov=p.id;render()};
+    el.appendChild(b);
+  });
+}
+const byProv=i=>S.prov==="all"||i.prov.includes(S.prov);
+
+/* cards */
+function skillCard(i,t){
+  const c=mk("article","card"),r=mk("div","row");
+  r.appendChild(provBadges(i.prov));
+  const h=mk("h3");hl(h,i.title,t);
+  const p=mk("p");hl(p,i.desc,t);
+  c.append(r,h);
+  if(i.stat)c.appendChild(mk("div","stat","★ "+i.stat));
+  c.appendChild(p);
+  if(i.cmd){c.appendChild(mk("div","lab","How to get it"));c.appendChild(cmdBox(i.cmd))}
+  if(i.tags){const tg=mk("div","tags");i.tags.forEach(x=>tg.appendChild(mk("em",null,x)));c.appendChild(tg)}
+  const a=mk("a","go","See details ↗");a.href=i.url;a.target="_blank";a.rel="noopener";c.appendChild(a);
+  return c;
+}
+function cmdCard(i,t){
+  const c=mk("article","card"),r=mk("div","row"),b=provBadges(i.prov);
+  b.appendChild(mk("span","badge lvl",i.type==="slash"?"Slash command":"Magic phrase"));
+  r.appendChild(b);
+  const h=mk("h3");hl(h,i.cmd,t);
+  const p=mk("p");hl(p,i.what,t);
+  c.append(r,h,p,cmdBox(i.cmd));
+  return c;
+}
+
+/* views */
+function renderStart(){
+  const g=$("#goals");g.textContent="";
+  [["<svg viewBox='0 0 24 24'><path d='M4 5h16v11H9l-5 4z'/></svg>","Prompts","Ready-made prompts for each AI.","prompts"],
+   ["<svg viewBox='0 0 24 24'><path d='M12 3l9 5-9 5-9-5z'/><path d='M3 13l9 5 9-5'/></svg>","Skills & add-ons","Extra abilities you can install.","skills"],
+   ["<svg viewBox='0 0 24 24'><path d='M4 6l6 6-6 6'/><path d='M13 18h7'/></svg>","Commands","Shortcuts to type in any AI.","cmds"]].forEach(a=>{
+    const b=mk("button");b.type="button";
+    const ic=mk("em");ic.innerHTML=a[0];b.append(ic,mk("strong",null,a[1]),mk("span",null,a[2]));
+    b.style.setProperty('--i',g.children.length);b.onclick=()=>go(a[3]);g.appendChild(b);
+  });
+}
+function renderSkills(){
+  const t=terms(S.q.qs);
+  chips($("#ps"));
+  const f=i=>byProv(i)&&has(i,t,x=>x.title+" "+x.desc);
+  const st=$("#st");st.textContent="";
+  SUBS.forEach(s=>{
+    const b=mk("button","sub",s.label);b.type="button";
+    b.setAttribute("aria-pressed",String(S.sub===s.id));
+    b.appendChild(mk("span",null,String(DATA.filter(i=>i.sec===s.id&&f(i)).length)));
+    b.onclick=()=>{S.sub=s.id;render()};st.appendChild(b);
+  });
+  $("#sh").textContent=SUBS.find(s=>s.id===S.sub).help;
+  const l=DATA.filter(i=>i.sec===S.sub&&f(i));
+  $("#cs").textContent=l.length+" result"+(l.length===1?"":"s")+(S.q.qs?` for “${S.q.qs}”`:"");
+  fill($("#ls"),l,skillCard,t);
+}
+function renderCmds(){
+  const t=terms(S.q.qc);
+  chips($("#pc"));
+  const l=CMDS.filter(i=>byProv(i)&&has(i,t,x=>x.cmd+" "+x.what));
+  $("#cc").textContent=l.length+" result"+(l.length===1?"":"s")+(S.q.qc?` for “${S.q.qc}”`:"");
+  fill($("#lc"),l,cmdCard,t);
+}
+const PNAME={claude:"Claude",openai:"ChatGPT",gemini:"Gemini"};
+const PSUB={claude:"Anthropic's chatbot and Claude Code",openai:"OpenAI's chatbot and Codex",gemini:"Google's chatbot and Gemini CLI"};
+function promptCard(i,t){
+  const c=mk("article","card pcard"),top=mk("div","top");
+  top.append(mk("span","ic",i.icon));
+  const hw=mk("div");const h=mk("h3");hl(h,i.title,t);hw.appendChild(h);
+  if(/ultrathink|fan out/i.test(i.title)){const b=mk("div","badges");b.appendChild(mk("span","badge pop","Popular"));hw.appendChild(b)}
+  top.appendChild(hw);
+  const u=mk("p");hl(u,i.use,t);
+  const w=mk("div","cmd"),pre=mk("pre","ptxt"),cb=mk("button","copy","Copy");
+  i.prompt.split(/(\[[^\]]+\])/).forEach(part=>{
+    if(/^\[[^\]]+\]$/.test(part))pre.appendChild(mk("span","ph",part));else pre.appendChild(document.createTextNode(part));
+  });
+  cb.type="button";cb.onclick=()=>copy(cb,i.prompt);w.append(pre,cb);
+  const tg=mk("div","tags");i.tags.forEach(x=>tg.appendChild(mk("em",null,x)));
+  c.append(top,u,mk("div","lab","Copy and paste"),w,tg);
+  return c;
+}
+function renderPrompts(){
+  const t=terms(S.q.qp);
+  const f=i=>has({prov:[S.pp],tags:i.tags},t,()=>i.title+" "+i.use+" "+i.prompt);
+  const tabs=$("#ptabs");tabs.textContent="";
+  ["claude","openai","gemini"].forEach(p=>{
+    const b=mk("button","ptab");b.type="button";b.setAttribute("aria-pressed",String(S.pp===p));
+    const d=mk("i");d.style.background="var(--"+p+")";
+    const w=mk("span");w.append(mk("b",null,PNAME[p]+" ("+PROMPTS[p].filter(x=>has({prov:[p],tags:x.tags},t,()=>x.title+" "+x.use+" "+x.prompt)).length+")"),mk("small",null,PSUB[p]));
+    b.append(d,w);b.onclick=()=>{S.pp=p;render()};tabs.appendChild(b);
+  });
+  const l=PROMPTS[S.pp].filter(f);
+  $("#cp").textContent=l.length+" prompt"+(l.length===1?"":"s")+" for "+PNAME[S.pp]+(S.q.qp?` matching “${S.q.qp}”`:"");
+  fill($("#lp"),l,promptCard,t);
+}
+function renderNav(){
+  const n=$("#nav");n.textContent="";
+  VIEWS.forEach(v=>{
+    const b=mk("button",null,v.label);b.type="button";
+    b.setAttribute("aria-pressed",String(S.view===v.id));
+    b.onclick=()=>go(v.id);n.appendChild(b);
+  });
+}
+function go(v){S.view=v;render();window.scrollTo({top:0})}
+function render(){
+  renderNav();
+  VIEWS.forEach(v=>$("#v-"+v.id).hidden=S.view!==v.id);
+  const slot=document.querySelector("#v-"+S.view+" .figslot");
+  if(slot&&figEl.parentNode!==slot)slot.appendChild(figEl);
+  if(!figHandle)startFigure();
+  if(S.view==="start")renderStart();
+  else if(S.view==="skills")renderSkills();
+  else if(S.view==="prompts")renderPrompts();
+  else renderCmds();
+}
+
+/* the figure: a pegboard that follows the pointer across the whole page */
+const figEl=mk("div","figure");
+let figHandle=null,lastE=null;
+function startFigure(){
+  try{
+    if(!window.HL||!window.FIGS||!window.FIGS[0])return;
+    HL.inject(document);
+    figEl.setAttribute("data-hairline","bloom");figEl.setAttribute("role","img");
+    figEl.setAttribute("aria-label","Decorative pegboard that rises toward your cursor");
+    const svg=HL.mk("svg",{viewBox:"0 0 400 320","aria-hidden":"true"},figEl);
+    figHandle=window.FIGS[0].mount({stage:figEl,svg,read:{set textContent(v){}}},3.4);
+  }catch(e){figEl.hidden=true}
+}
+function feed(e){
+  if(!figHandle)return;
+  lastE=e;
+  const r=figEl.getBoundingClientRect();
+  if(!r.width)return;
+  const x=Math.max(-60,Math.min(460,(e.clientX-r.left)/r.width*400)),y=Math.max(-50,Math.min(370,(e.clientY-r.top)/r.height*320));
+  figEl.dispatchEvent(new PointerEvent("pointermove",{pointerType:"mouse",pointerId:1,bubbles:true,clientX:r.left+x/400*r.width,clientY:r.top+y/320*r.height}));
+}
+addEventListener("pointermove",feed,{passive:true});
+addEventListener("scroll",()=>{if(lastE)feed(lastE)},{passive:true});
+document.documentElement.addEventListener("pointerleave",()=>{lastE=null;figEl.dispatchEvent(new PointerEvent("pointerleave",{pointerType:"mouse",pointerId:1}))});
+
+/* events */
+["qs","qp","qc"].forEach(id=>$("#"+id).addEventListener("input",e=>{S.q[id]=e.target.value.trim();render()}));
+document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{const id=b.dataset.clear;$("#"+id).value="";S.q[id]="";render()});
+$("#home").onclick=()=>go("start");
+$("#theme").onclick=()=>{
+  const r=document.documentElement;
+  const dark=r.getAttribute("data-theme")==="dark"||(!r.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
+  r.setAttribute("data-theme",dark?"light":"dark");
+};
+function net(){
+  const on=navigator.onLine!==false;
+  $("#net").classList.toggle("off",!on);
+  $("#nettxt").textContent=on?"Online (works offline too)":"Offline: browsing works, links won't open";
+}
+addEventListener("online",net);addEventListener("offline",net);net();
+render();
+</script>
+</body>
+</html>
