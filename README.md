@@ -51,11 +51,6 @@ Save the file and refresh the page. There is no build step.
 - Slash commands change between tool versions. Type `/help` inside the tool to see what yours offers.
 - Skills can include scripts. Read a project's page before installing it.
 
-## Credits
-
-Created by **SRIVELTECH**.
-
-The mouse-following pegboard uses the **Hairline** line-drawing engine (`@lucasmarkes/hairline`), embedded in `index.html`. Check that project's license and keep its credit if you publish or redistribute this file.
 
 ## Trademarks
 
